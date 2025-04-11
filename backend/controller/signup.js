@@ -1,32 +1,5 @@
-// const userModel = require("../models/userSchems")
-// const bycrypt = require("bycrypt")
-
-// const signupCON= async => (req,res) {
-//     let {name, email, password, age, contact} = req.body    
-//     let hashpass = await bycrypt.hash(password, 10)
-
-//     try (
-//         let register = await userModel.create({
-//             name:name,
-//             email:email,
-//             passowrd:hashpass,
-//             age:age,
-//             contact:contact,
-//         })
-//     )
-
-
-// }
-
-
-// module.exports = signupCON
-
-// controllers/signup.js
-
-const User = require("../models/userSchems"); // adjust path as needed
-const bcrypt = require("bcrypt");
-
-
+const User = require("../models/userSchemas");
+const bcrypt = require("bcrypt"); //for encrypt password in hash 
 
 const signup = async (req, res) => {
     try {
@@ -34,6 +7,10 @@ const signup = async (req, res) => {
         let hashpass = await bcrypt.hash(password, 10);
         console.log(hashpass);
 
+        const existingUser = await User.findOne({ $or: [{ email }, { name }] })
+        if (existingUser) {
+            return res.status(400).json({ message: "User with this name or email  already exist" })
+        }
         // Create and save new user
         const newUser = new User({ name, email, password: hashpass, age, contact });
         await newUser.save();
